@@ -65,7 +65,7 @@ Pré-requisitos:
 Passos:
 1. Clone o repositório:
    ```bash
-   https://github.com/GuGodoi7/Nexus_sprint.git
+   git clone https://github.com/GuGodoi7/Nexus_sprint.git
    cd Nexus_sprint
    cd Nexus
 2. Configure a string de conexão no appsettings.json:
