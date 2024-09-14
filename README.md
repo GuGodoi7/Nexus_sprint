@@ -14,7 +14,7 @@
 - --------------------------------------------------
 ## 🏛 Arquitetura<h3>
 
-Optamos por uma arquitetura monolítica pois o projeto tem um escopo definido e as funcionalidades são bem integradas. Isso facilita a integração e a comunicação entre os módulos. Além disso, como a aplicação é menor, o desenvolvimento e os testes são mais simples, e a implantação é mais direta, já que se lida com um único aplicativo. Não há expectativa de grande crescimento ou mudanças complexas no curto prazo, então o monolito é mais prático e econômico para as necessidades atuais. Também ajuda a economizar nos custos de infraestrutura.
+Optamos por uma arquitetura monolítica pois o projeto tem um escopo definido e as funcionalidades são bem integradas, facilitando a comunicação entre os módulos. Além disso, como a aplicação é menor, o desenvolvimento e os testes são mais simples, já que se lida com um único aplicativo. Não há expectativa de grande crescimento ou mudanças complexas no curto prazo, então o monolito é mais prático e econômico para as necessidades atuais. Também ajuda a economizar nos custos de infraestrutura.
 - --------------------------------------------------
 ## 📚 Projeto 
 
