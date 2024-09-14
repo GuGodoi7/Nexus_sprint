@@ -57,7 +57,7 @@ Optamos por uma arquitetura monolítica pois o projeto tem um escopo definido e 
 ## 🚀 Como Rodar a Aplicação
 
 Pré-requisitos:
-- .NET 8 SDK
+- .NET 8 
 - Oracle Database
 - Visual Studio ou VS Code
 - Git  
