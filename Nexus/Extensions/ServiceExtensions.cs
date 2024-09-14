@@ -1,7 +1,7 @@
-﻿using _NEXUS.Repository;
-using _NEXUS.Repository.Interfaces;
-using _NEXUS.Service;
+﻿using _NEXUS.Repository.Interfaces;
+using _NEXUS.Repository;
 using _NEXUS.Service.InterfacesService;
+using _NEXUS.Service;
 
 namespace Nexus.Extensions
 {
