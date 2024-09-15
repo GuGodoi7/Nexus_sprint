@@ -1,4 +1,5 @@
 ﻿using _NEXUS.Models;
+using _NEXUS.Repository;
 using _NEXUS.Repository.Interfaces;
 using _NEXUS.Service.InterfacesService;
 using System;
@@ -36,13 +37,7 @@ namespace _NEXUS.Service
 
         public async Task UpdateUserAsync(int id, UsuarioModel user)
         {
-            var existingUser = await _usersRepository.GetByIdAsync(id);
-            if (existingUser != null)
-            {
-                existingUser.NomeUsuario = user.NomeUsuario;
-                existingUser.CPF = user.CPF;
-                await _usersRepository.UpdateAsync(existingUser);
-            }
+            await _usersRepository.UpdateAsync(user);
         }
 
         public async Task DeleteUserAsync(int id)

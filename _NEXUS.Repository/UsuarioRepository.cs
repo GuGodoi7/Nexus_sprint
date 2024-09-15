@@ -25,24 +25,24 @@ namespace _NEXUS.Repository
             return await _context.Usuarios.FindAsync(id);
         }
 
-        public async Task AddAsync(UsuarioModel user)
+        public async Task AddAsync(UsuarioModel Usuarios)
         {
-            _context.Usuarios.Add(user);
+            _context.Usuarios.Add(Usuarios);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(UsuarioModel user)
+        public async Task UpdateAsync(UsuarioModel Usuarios)
         {
-            _context.Usuarios.Update(user);
+            _context.Usuarios.Update(Usuarios);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            var user = await _context.Usuarios.FindAsync(id);
-            if (user != null)
+            var Usuarios = await _context.Usuarios.FindAsync(id);
+            if (Usuarios != null)
             {
-                _context.Usuarios.Remove(user);
+                _context.Usuarios.Remove(Usuarios);
                 await _context.SaveChangesAsync();
             }
         }

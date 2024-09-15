@@ -49,7 +49,7 @@ namespace Nexus.Controllers
         [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(ProdutosModel))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<ProdutosModel>> PostProduto([FromBody] ProdutosModel produto)
+        public async Task<ActionResult<ProdutosModel>> PostProduto([FromForm] ProdutosModel produto)
         {
             LogManager.Instance.Log("Criando novo produto.");
             var createdProduto = await _produtosService.CreateProdutoAsync(produto);
@@ -62,7 +62,7 @@ namespace Nexus.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> PutProduto(int id, [FromBody] ProdutosModel produto)
+        public async Task<IActionResult> PutProduto(int id, [FromForm] ProdutosModel produto)
         {
             if (id != produto.IdProduto)
             {
