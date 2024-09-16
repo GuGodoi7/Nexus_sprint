@@ -17,7 +17,6 @@ namespace Nexus.Controllers
             _pedidosService = pedidosService;
         }
 
-        // GET: api/Pedidos
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<PedidoResponseDTO>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
@@ -25,20 +24,19 @@ namespace Nexus.Controllers
         {
             var pedidos = await _pedidosService.GetAllPedidosAsync();
 
-            // Mapeando PedidosModel para PedidoResponseDTO
             var pedidosDto = pedidos.Select(p => new PedidoResponseDTO
             {
                 IdPedido = p.IdPedido,
                 CodigoPedido = p.CodigoPedido,
                 Quantidade = p.Quantidade,
                 ValorPedido = p.ValorPedido,
-                IdUsuario = p.IdUsuario // Certifique-se de que a propriedade está correta
+                IdUsuario = p.IdUsuario 
             });
 
             return Ok(pedidosDto);
         }
 
-        // GET: api/Pedidos/5
+
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(PedidoResponseDTO), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -51,20 +49,19 @@ namespace Nexus.Controllers
                 return NotFound();
             }
 
-            // Mapeando para DTO
+
             var pedidoDto = new PedidoResponseDTO
             {
                 IdPedido = pedido.IdPedido,
                 CodigoPedido = pedido.CodigoPedido,
                 Quantidade = pedido.Quantidade,
                 ValorPedido = pedido.ValorPedido,
-                IdUsuario = pedido.IdUsuario // Certifique-se de que a propriedade está correta
+                IdUsuario = pedido.IdUsuario 
             };
 
             return Ok(pedidoDto);
         }
 
-        // POST: api/Pedidos
         [HttpPost]
         [ProducesResponseType(typeof(PedidoResponseDTO), (int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -81,25 +78,25 @@ namespace Nexus.Controllers
                 CodigoPedido = pedidoDto.CodigoPedido,
                 Quantidade = pedidoDto.Quantidade,
                 ValorPedido = pedidoDto.ValorPedido,
-                IdUsuario = pedidoDto.IdUsuario // Certifique-se de que a propriedade está correta
+                IdUsuario = pedidoDto.IdUsuario 
             };
 
             var createdPedido = await _pedidosService.CreatePedidoAsync(novoPedido);
 
-            // Retornando o DTO do pedido criado
+
             var createdPedidoDto = new PedidoResponseDTO
             {
                 IdPedido = createdPedido.IdPedido,
                 CodigoPedido = createdPedido.CodigoPedido,
                 Quantidade = createdPedido.Quantidade,
                 ValorPedido = createdPedido.ValorPedido,
-                IdUsuario = createdPedido.IdUsuario // Certifique-se de que a propriedade está correta
+                IdUsuario = createdPedido.IdUsuario 
             };
 
             return CreatedAtAction(nameof(GetPedido), new { id = createdPedido.IdPedido }, createdPedidoDto);
         }
 
-        // PUT: api/Pedidos/5
+
         [HttpPut("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -107,7 +104,7 @@ namespace Nexus.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> PutPedido(int id, [FromBody] PedidoResponseDTO pedidoDto)
         {
-            if (id != pedidoDto.IdPedido) // Compare com IdPedido, não com CodigoPedido
+            if (id != pedidoDto.IdPedido) 
             {
                 return BadRequest();
             }
@@ -118,7 +115,7 @@ namespace Nexus.Controllers
                 CodigoPedido = pedidoDto.CodigoPedido,
                 Quantidade = pedidoDto.Quantidade,
                 ValorPedido = pedidoDto.ValorPedido,
-                IdUsuario = pedidoDto.IdUsuario // Certifique-se de que a propriedade está correta
+                IdUsuario = pedidoDto.IdUsuario 
             };
 
             try
@@ -133,7 +130,6 @@ namespace Nexus.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Pedidos/5
         [HttpDelete("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
