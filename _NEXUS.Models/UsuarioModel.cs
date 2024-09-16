@@ -11,5 +11,6 @@
         public string email { get; set; }
 
         public long telefone { get; set; }
+
     }
 }

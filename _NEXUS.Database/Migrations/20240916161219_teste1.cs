@@ -5,26 +5,11 @@
 namespace _NEXUS.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class teste1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "TB_NX_PEDIDOS",
-                columns: table => new
-                {
-                    ID_PEDIDO = table.Column<int>(type: "NUMBER(10)", nullable: false)
-                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
-                    NR_PEDIDO = table.Column<long>(type: "NUMBER(19)", nullable: false),
-                    VL_QUANTIDADE = table.Column<int>(type: "NUMBER(10)", nullable: false),
-                    VL_PEDIDO = table.Column<int>(type: "NUMBER(10)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TB_NX_PEDIDOS", x => x.ID_PEDIDO);
-                });
-
             migrationBuilder.CreateTable(
                 name: "TB_NX_PRODUTOS",
                 columns: table => new
@@ -59,6 +44,33 @@ namespace _NEXUS.Database.Migrations
                 {
                     table.PrimaryKey("PK_TB_NX_USUARIOS", x => x.ID_USUARIO);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "TB_NX_PEDIDOS",
+                columns: table => new
+                {
+                    ID_PEDIDO = table.Column<int>(type: "NUMBER(10)", nullable: false)
+                        .Annotation("Oracle:Identity", "START WITH 1 INCREMENT BY 1"),
+                    NR_PEDIDO = table.Column<long>(type: "NUMBER(19)", nullable: false),
+                    VL_QUANTIDADE = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    VL_PEDIDO = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    IdUsuario = table.Column<int>(type: "NUMBER(10)", nullable: false),
+                    UsuarioIdUsuario = table.Column<int>(type: "NUMBER(10)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TB_NX_PEDIDOS", x => x.ID_PEDIDO);
+                    table.ForeignKey(
+                        name: "FK_TB_NX_PEDIDOS_TB_NX_USUARIOS_UsuarioIdUsuario",
+                        column: x => x.UsuarioIdUsuario,
+                        principalTable: "TB_NX_USUARIOS",
+                        principalColumn: "ID_USUARIO");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TB_NX_PEDIDOS_UsuarioIdUsuario",
+                table: "TB_NX_PEDIDOS",
+                column: "UsuarioIdUsuario");
         }
 
         /// <inheritdoc />

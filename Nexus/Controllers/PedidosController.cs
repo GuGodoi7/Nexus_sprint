@@ -1,7 +1,7 @@
 ﻿using _NEXUS.Models;
-using _NEXUS.Repository;
 using _NEXUS.Service.InterfacesService;
 using Microsoft.AspNetCore.Mvc;
+using Nexus.dto;
 using System.Net;
 
 namespace Nexus.Controllers
@@ -17,77 +17,123 @@ namespace Nexus.Controllers
             _pedidosService = pedidosService;
         }
 
-
+        // GET: api/Pedidos
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<PedidosModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<PedidoResponseDTO>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<IEnumerable<PedidosModel>>> GetPedidos()
+        public async Task<ActionResult<IEnumerable<PedidoResponseDTO>>> GetPedidos()
         {
-            LogManager.Instance.Log("Obtendo todos os pedidos.");
             var pedidos = await _pedidosService.GetAllPedidosAsync();
-            return Ok(pedidos);
+
+            // Mapeando PedidosModel para PedidoResponseDTO
+            var pedidosDto = pedidos.Select(p => new PedidoResponseDTO
+            {
+                IdPedido = p.IdPedido,
+                CodigoPedido = p.CodigoPedido,
+                Quantidade = p.Quantidade,
+                ValorPedido = p.ValorPedido,
+                IdUsuario = p.IdUsuario // Certifique-se de que a propriedade está correta
+            });
+
+            return Ok(pedidosDto);
         }
 
-
-
+        // GET: api/Pedidos/5
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(PedidosModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(PedidoResponseDTO), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<PedidosModel>> GetPedido(int id)
+        public async Task<ActionResult<PedidoResponseDTO>> GetPedido(int id)
         {
-            LogManager.Instance.Log($"Obtendo pedido com ID: {id}");
             var pedido = await _pedidosService.GetPedidoByIdAsync(id);
             if (pedido == null)
             {
-                LogManager.Instance.Log("Pedido não encontrado.");
                 return NotFound();
             }
-            return Ok(pedido);
+
+            // Mapeando para DTO
+            var pedidoDto = new PedidoResponseDTO
+            {
+                IdPedido = pedido.IdPedido,
+                CodigoPedido = pedido.CodigoPedido,
+                Quantidade = pedido.Quantidade,
+                ValorPedido = pedido.ValorPedido,
+                IdUsuario = pedido.IdUsuario // Certifique-se de que a propriedade está correta
+            };
+
+            return Ok(pedidoDto);
         }
 
+        // POST: api/Pedidos
         [HttpPost]
-        [ProducesResponseType(typeof(PedidosModel), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(PedidoResponseDTO), (int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<PedidosModel>> PostPedido([FromForm] PedidosModel pedido)
+        public async Task<ActionResult<PedidoResponseDTO>> PostPedido([FromBody] PedidoResponseDTO pedidoDto)
         {
-            LogManager.Instance.Log("Criando novo pedido.");
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var createdPedido = await _pedidosService.CreatePedidoAsync(pedido);
-            return CreatedAtAction(nameof(GetPedido), new { id = createdPedido.IdPedido }, createdPedido);
+            var novoPedido = new PedidosModel
+            {
+                CodigoPedido = pedidoDto.CodigoPedido,
+                Quantidade = pedidoDto.Quantidade,
+                ValorPedido = pedidoDto.ValorPedido,
+                IdUsuario = pedidoDto.IdUsuario // Certifique-se de que a propriedade está correta
+            };
+
+            var createdPedido = await _pedidosService.CreatePedidoAsync(novoPedido);
+
+            // Retornando o DTO do pedido criado
+            var createdPedidoDto = new PedidoResponseDTO
+            {
+                IdPedido = createdPedido.IdPedido,
+                CodigoPedido = createdPedido.CodigoPedido,
+                Quantidade = createdPedido.Quantidade,
+                ValorPedido = createdPedido.ValorPedido,
+                IdUsuario = createdPedido.IdUsuario // Certifique-se de que a propriedade está correta
+            };
+
+            return CreatedAtAction(nameof(GetPedido), new { id = createdPedido.IdPedido }, createdPedidoDto);
         }
 
+        // PUT: api/Pedidos/5
         [HttpPut("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> PutPedido(int id, [FromForm] PedidosModel pedido)
+        public async Task<IActionResult> PutPedido(int id, [FromBody] PedidoResponseDTO pedidoDto)
         {
-            if (id != pedido.IdPedido)
+            if (id != pedidoDto.IdPedido) // Compare com IdPedido, não com CodigoPedido
             {
-                LogManager.Instance.Log("ID do pedido não corresponde.");
                 return BadRequest();
             }
+
+            var pedidoAtualizado = new PedidosModel
+            {
+                IdPedido = pedidoDto.IdPedido,
+                CodigoPedido = pedidoDto.CodigoPedido,
+                Quantidade = pedidoDto.Quantidade,
+                ValorPedido = pedidoDto.ValorPedido,
+                IdUsuario = pedidoDto.IdUsuario // Certifique-se de que a propriedade está correta
+            };
+
             try
             {
-                LogManager.Instance.Log($"Atualizando pedido com ID: {id}");
-                await _pedidosService.UpdatePedidoAsync(id, pedido);
+                await _pedidosService.UpdatePedidoAsync(id, pedidoAtualizado);
             }
             catch (KeyNotFoundException)
             {
-                LogManager.Instance.Log("Pedido não encontrado para atualização.");
                 return NotFound();
             }
+
             return NoContent();
         }
 
- 
+        // DELETE: api/Pedidos/5
         [HttpDelete("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -96,14 +142,13 @@ namespace Nexus.Controllers
         {
             try
             {
-                LogManager.Instance.Log($"Deletando pedido com ID: {id}");
                 await _pedidosService.DeletePedidoAsync(id);
             }
             catch (KeyNotFoundException)
             {
-                LogManager.Instance.Log("Pedido não encontrado para exclusão.");
                 return NotFound();
             }
+
             return NoContent();
         }
     }

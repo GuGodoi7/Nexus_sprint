@@ -3,6 +3,7 @@ using _NEXUS.Repository;
 using _NEXUS.Service.InterfacesService;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Nexus.Controllers
 {
@@ -27,7 +28,6 @@ namespace Nexus.Controllers
             return Ok(users);
         }
 
-
         [HttpGet("{id}")]
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(UsuarioModel))]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -46,12 +46,11 @@ namespace Nexus.Controllers
             return Ok(user);
         }
 
-
         [HttpPost]
         [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(UsuarioModel))]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateUser([FromForm] UsuarioModel user)
+        public async Task<IActionResult> CreateUser([FromBody] UsuarioModel user)
         {
             if (!ModelState.IsValid)
             {
@@ -64,13 +63,12 @@ namespace Nexus.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = createdUser.IdUsuario }, createdUser);
         }
 
-
         [HttpPut("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateUser(int id, [FromForm] UsuarioModel user)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UsuarioModel user)
         {
             if (!ModelState.IsValid)
             {
@@ -97,7 +95,6 @@ namespace Nexus.Controllers
 
             return NoContent();
         }
-
 
         [HttpDelete("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]

@@ -1,18 +1,14 @@
-﻿namespace _NEXUS.Models
+﻿namespace Nexus.dto
 {
-    public class PedidosModel
+    public class PedidoResponseDTO
     {
         public int IdPedido { get; set; }
-
         public long CodigoPedido { get; set; }
 
         public int Quantidade { get; set; }
 
         public int ValorPedido { get; set; }
 
-        //1..N
         public int IdUsuario { get; set; }
-        public UsuarioModel? Usuario { get; set; }
-
     }
 }
