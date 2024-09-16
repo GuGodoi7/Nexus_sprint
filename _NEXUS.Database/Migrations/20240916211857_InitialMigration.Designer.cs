@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace _NEXUS.Database.Migrations
 {
     [DbContext(typeof(NXContext))]
-    [Migration("20240916161219_teste1")]
-    partial class teste1
+    [Migration("20240916211857_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

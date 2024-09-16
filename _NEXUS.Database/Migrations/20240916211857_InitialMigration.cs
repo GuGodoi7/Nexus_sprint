@@ -5,7 +5,7 @@
 namespace _NEXUS.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class teste1 : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
