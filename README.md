@@ -75,6 +75,9 @@ Passos:
               "NXContext": "Data Source=oracle.fiap.com.br:1521/orcl;User ID=xxxxx;Password=xxxxx;"
         }
       }
+3. Crie as tabelas no seu banco de dados (Execute esse comando no Console do Gerenciador de Pacotes. Além disso, selecione '_Nexus.Database' como Projeto padrão):
+     ```bash
+   Update-Database
 
 4. Restaure as dependências e execute a aplicação:
      ```bash
