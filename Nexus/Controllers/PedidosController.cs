@@ -6,146 +6,141 @@ using System.Net;
 
 namespace Nexus.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class PedidosController : ControllerBase
+    [Tags("Tasks")]
+    [Route("api/tasks")]
+    public class TasksController : ControllerBase
     {
-        private readonly IPedidosService _pedidosService;
+        private readonly TaskUseCase _taskUseCase;
 
-        public PedidosController(IPedidosService pedidosService)
+        public TasksController(TaskUseCase taskUseCase)
         {
-            _pedidosService = pedidosService;
+            _taskUseCase = taskUseCase;
         }
 
+        /// <summary>
+        /// Retrieves all tasks
+        /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<PedidoResponseDTO>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<IEnumerable<PedidoResponseDTO>>> GetPedidos()
+        public ActionResult<IEnumerable<Task>> GetAll()
         {
-            var pedidos = await _pedidosService.GetAllPedidosAsync();
+            var tasks = _taskUseCase.GetAllTasks();
 
-            var pedidosDto = pedidos.Select(p => new PedidoResponseDTO
-            {
-                IdPedido = p.IdPedido,
-                CodigoPedido = p.CodigoPedido,
-                Quantidade = p.Quantidade,
-                ValorPedido = p.ValorPedido,
-                IdUsuario = p.IdUsuario 
-            });
-
-            return Ok(pedidosDto);
+            return Ok(tasks);
         }
 
-
+        /// <summary>
+        /// Retrieves a specific task by ID
+        /// </summary>
+        /// <param name="id">The ID of the task</param>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(PedidoResponseDTO), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Task), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<PedidoResponseDTO>> GetPedido(int id)
+        public ActionResult<Task> GetById(string id)
         {
-            var pedido = await _pedidosService.GetPedidoByIdAsync(id);
-            if (pedido == null)
+            var task = _taskUseCase.GetTaskById(id);
+
+            if (task == null)
             {
                 return NotFound();
             }
 
-
-            var pedidoDto = new PedidoResponseDTO
-            {
-                IdPedido = pedido.IdPedido,
-                CodigoPedido = pedido.CodigoPedido,
-                Quantidade = pedido.Quantidade,
-                ValorPedido = pedido.ValorPedido,
-                IdUsuario = pedido.IdUsuario 
-            };
-
-            return Ok(pedidoDto);
+            return Ok(task);
         }
 
+        /// <summary>
+        /// Create a new task
+        /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(PedidoResponseDTO), (int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<PedidoResponseDTO>> PostPedido([FromBody] PedidoResponseDTO pedidoDto)
+        public IActionResult CreateTask([FromBody] CreateTaskRequest request)
         {
-            if (!ModelState.IsValid)
+            if (request == null || string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Description))
             {
-                return BadRequest(ModelState);
+                return BadRequest("Title and Description are required.");
             }
 
-            var novoPedido = new PedidosModel
+            var task = new Task
             {
-                CodigoPedido = pedidoDto.CodigoPedido,
-                Quantidade = pedidoDto.Quantidade,
-                ValorPedido = pedidoDto.ValorPedido,
-                IdUsuario = pedidoDto.IdUsuario 
+                Title = request.Title,
+                Description = request.Description
             };
 
-            var createdPedido = await _pedidosService.CreatePedidoAsync(novoPedido);
+            _taskUseCase.AddTask(task);
 
-
-            var createdPedidoDto = new PedidoResponseDTO
-            {
-                IdPedido = createdPedido.IdPedido,
-                CodigoPedido = createdPedido.CodigoPedido,
-                Quantidade = createdPedido.Quantidade,
-                ValorPedido = createdPedido.ValorPedido,
-                IdUsuario = createdPedido.IdUsuario 
-            };
-
-            return CreatedAtAction(nameof(GetPedido), new { id = createdPedido.IdPedido }, createdPedidoDto);
+            return Created();
         }
 
-
+        /// <summary>
+        /// Updates an existing task
+        /// </summary>
+        /// <param name="id">The ID of the task</param>
         [HttpPut("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> PutPedido(int id, [FromBody] PedidoResponseDTO pedidoDto)
+        public IActionResult Update(string id, [FromBody] CreateTaskRequest request)
         {
-            if (id != pedidoDto.IdPedido) 
-            {
-                return BadRequest();
-            }
+            var taskToUpdate = _taskUseCase.GetTaskById(id);
 
-            var pedidoAtualizado = new PedidosModel
-            {
-                IdPedido = pedidoDto.IdPedido,
-                CodigoPedido = pedidoDto.CodigoPedido,
-                Quantidade = pedidoDto.Quantidade,
-                ValorPedido = pedidoDto.ValorPedido,
-                IdUsuario = pedidoDto.IdUsuario 
-            };
-
-            try
-            {
-                await _pedidosService.UpdatePedidoAsync(id, pedidoAtualizado);
-            }
-            catch (KeyNotFoundException)
+            if (taskToUpdate == null)
             {
                 return NotFound();
             }
+
+            taskToUpdate.Title = request.Title;
+            taskToUpdate.Description = request.Description;
+
+            _taskUseCase.UpdateTask(taskToUpdate);
 
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a task by id
+        /// </summary>
+        /// <param name="id">The ID of the task</param>
         [HttpDelete("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> DeletePedido(int id)
+        public IActionResult Delete(string id)
         {
-            try
-            {
-                await _pedidosService.DeletePedidoAsync(id);
-            }
-            catch (KeyNotFoundException)
+            var taskToDelete = _taskUseCase.GetTaskById(id);
+
+            if (taskToDelete == null)
             {
                 return NotFound();
             }
 
+            _taskUseCase.DeleteTask(id);
+
             return NoContent();
+        }
+
+        /// <summary>
+        /// Marks a task as complete
+        /// </summary>
+        /// <param name="id">The ID of the task</param>
+        [HttpPost("{id}/complete")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public IActionResult MarkAsComplete(string id)
+        {
+            var task = _taskUseCase.GetTaskById(id);
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            task.IsCompleted = true;
+
+            _taskUseCase.UpdateTask(task);
+
+            return Ok();
         }
     }
 }

@@ -6,114 +6,141 @@ using System.Net;
 using System.Threading.Tasks;
 
 namespace Nexus.Controllers
-{
-    [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+[Tags("Tasks")]
+[Route("api/tasks")]
+public class TasksController : ControllerBase
+{
+    private readonly TaskUseCase _taskUseCase;
+
+    public TasksController(TaskUseCase taskUseCase)
     {
-        private readonly IUsuarioService _usersService;
-
-        public UsersController(IUsuarioService usersService)
-        {
-            _usersService = usersService;
-        }
-
-        [HttpGet]
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<UsuarioModel>))]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUsers()
-        {
-            LogManager.Instance.Log("Obtendo todos os usuários.");
-            var users = await _usersService.GetAllUsersAsync();
-            return Ok(users);
-        }
-
-        [HttpGet("{id}")]
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(UsuarioModel))]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUser(int id)
-        {
-            LogManager.Instance.Log($"Obtendo usuário com ID: {id}");
-            var user = await _usersService.GetUserByIdAsync(id);
-
-            if (user == null)
-            {
-                LogManager.Instance.Log("Usuário não encontrado.");
-                return NotFound();
-            }
-
-            return Ok(user);
-        }
-
-        [HttpPost]
-        [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(UsuarioModel))]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateUser([FromBody] UsuarioModel user)
-        {
-            if (!ModelState.IsValid)
-            {
-                LogManager.Instance.Log("Modelo de usuário inválido.");
-                return BadRequest(ModelState);
-            }
-
-            LogManager.Instance.Log("Criando novo usuário.");
-            var createdUser = await _usersService.CreateUserAsync(user);
-            return CreatedAtAction(nameof(GetUser), new { id = createdUser.IdUsuario }, createdUser);
-        }
-
-        [HttpPut("{id}")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UsuarioModel user)
-        {
-            if (!ModelState.IsValid)
-            {
-                LogManager.Instance.Log("Modelo de usuário inválido.");
-                return BadRequest();
-            }
-
-            if (id != user.IdUsuario)
-            {
-                LogManager.Instance.Log("ID do usuário não corresponde.");
-                return BadRequest();
-            }
-
-            try
-            {
-                LogManager.Instance.Log($"Atualizando usuário com ID: {id}");
-                await _usersService.UpdateUserAsync(id, user);
-            }
-            catch (KeyNotFoundException)
-            {
-                LogManager.Instance.Log("Usuário não encontrado para atualização.");
-                return NotFound();
-            }
-
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            try
-            {
-                LogManager.Instance.Log($"Deletando usuário com ID: {id}");
-                await _usersService.DeleteUserAsync(id);
-            }
-            catch (KeyNotFoundException)
-            {
-                LogManager.Instance.Log("Usuário não encontrado para exclusão.");
-                return NotFound();
-            }
-
-            return NoContent();
-        }
+        _taskUseCase = taskUseCase;
     }
+
+    /// <summary>
+    /// Retrieves all tasks
+    /// </summary>
+    [HttpGet]
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+    public ActionResult<IEnumerable<Task>> GetAll()
+    {
+        var tasks = _taskUseCase.GetAllTasks();
+
+        return Ok(tasks);
+    }
+
+    /// <summary>
+    /// Retrieves a specific task by ID
+    /// </summary>
+    /// <param name="id">The ID of the task</param>
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(Task), (int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    public ActionResult<Task> GetById(string id)
+    {
+        var task = _taskUseCase.GetTaskById(id);
+
+        if (task == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(task);
+    }
+
+    /// <summary>
+    /// Create a new task
+    /// </summary>
+    [HttpPost]
+    [ProducesResponseType((int)HttpStatusCode.Created)]
+    [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+    public IActionResult CreateTask([FromBody] CreateTaskRequest request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.Description))
+        {
+            return BadRequest("Title and Description are required.");
+        }
+
+        var task = new Task
+        {
+            Title = request.Title,
+            Description = request.Description
+        };
+
+        _taskUseCase.AddTask(task);
+
+        return Created();
+    }
+
+    /// <summary>
+    /// Updates an existing task
+    /// </summary>
+    /// <param name="id">The ID of the task</param>
+    [HttpPut("{id}")]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    public IActionResult Update(string id, [FromBody] CreateTaskRequest request)
+    {
+        var taskToUpdate = _taskUseCase.GetTaskById(id);
+
+        if (taskToUpdate == null)
+        {
+            return NotFound();
+        }
+
+        taskToUpdate.Title = request.Title;
+        taskToUpdate.Description = request.Description;
+
+        _taskUseCase.UpdateTask(taskToUpdate);
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Deletes a task by id
+    /// </summary>
+    /// <param name="id">The ID of the task</param>
+    [HttpDelete("{id}")]
+    [ProducesResponseType((int)HttpStatusCode.NoContent)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    public IActionResult Delete(string id)
+    {
+        var taskToDelete = _taskUseCase.GetTaskById(id);
+
+        if (taskToDelete == null)
+        {
+            return NotFound();
+        }
+
+        _taskUseCase.DeleteTask(id);
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Marks a task as complete
+    /// </summary>
+    /// <param name="id">The ID of the task</param>
+    [HttpPost("{id}/complete")]
+    [ProducesResponseType((int)HttpStatusCode.OK)]
+    [ProducesResponseType((int)HttpStatusCode.NotFound)]
+    public IActionResult MarkAsComplete(string id)
+    {
+        var task = _taskUseCase.GetTaskById(id);
+
+        if (task == null)
+        {
+            return NotFound();
+        }
+
+        task.IsCompleted = true;
+
+        _taskUseCase.UpdateTask(task);
+
+        return Ok();
+    }
+}
 }

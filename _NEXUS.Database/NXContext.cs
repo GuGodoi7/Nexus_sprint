@@ -1,5 +1,4 @@
 ﻿using _NEXUS.Models;
-using _NEXUS.Models.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 namespace NX.Database
@@ -14,10 +13,6 @@ namespace NX.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new UsuarioMapping());
-            modelBuilder.ApplyConfiguration(new ProdutosMapping());
-            modelBuilder.ApplyConfiguration(new PedidosMapping());
-
             base.OnModelCreating(modelBuilder);
         }
     }

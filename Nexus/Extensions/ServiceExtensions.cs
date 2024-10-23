@@ -1,27 +1,47 @@
 ﻿using _NEXUS.Repository.Interfaces;
 using _NEXUS.Repository;
-using _NEXUS.Service.InterfacesService;
-using _NEXUS.Service;
+using Microsoft.OpenApi.Models;
+using Nexus.Configuration;
+using NX.Database;
 
 namespace Nexus.Extensions
 {
-    public static class ServiceExtensions
+    public static class ServicesExtensions
     {
-        public static IServiceCollection AddRepositories(this IServiceCollection services)
+        public static IServiceCollection AddSwagger(this IServiceCollection services, APIConfiguration appConfiguration)
         {
-            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-            services.AddScoped<IPedidosRepository, PedidosRepository>();
-            services.AddScoped<IProdutosRepository, ProdutosRepository>();
+            services.AddSwaggerGen(x =>
+            {
+                x.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = appConfiguration.Swagger.Title,
+                    Version = "v1",
+                    Description = appConfiguration.Swagger.Description,
+                    Contact = new OpenApiContact() { Email = appConfiguration.Swagger.Email, Name = appConfiguration.Swagger.Name }
+                });
+            });
 
             return services;
         }
 
-        public static IServiceCollection AddServices(this IServiceCollection services)
+        public static IServiceCollection AddUseCases(this IServiceCollection services)
         {
-            services.AddScoped<IUsuarioService, UsuarioService>();
-            services.AddScoped<IPedidosService, PedidosService>();
-            services.AddScoped<IProdutosService, ProdutosService>();
+            services.AddScoped<TaskUseCase>();
+            return services;
+        }
 
+        public static IServiceCollection AddRepositories(this IServiceCollection services)
+        {
+            services.AddScoped<IRepository<Task>, Repository<Task>>();
+            return services;
+        }
+
+        public static IServiceCollection AddMongoDbContext(this IServiceCollection services, APIConfiguration appConfiguration)
+        {
+            services.AddDbContext<NXContext>(options =>
+            {
+                options.UseMongoDB(appConfiguration.MongoDbConnectionString, appConfiguration.MongoDbDatabase);
+            });
             return services;
         }
     }
